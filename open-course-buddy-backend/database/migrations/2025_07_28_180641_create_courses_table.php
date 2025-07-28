@@ -17,13 +17,13 @@ return new class extends Migration
             $table->text('description');
             $table->string('thumbnail')->nullable();
             $table->string('category');
-            $table->string('instructor'); // <-- Tambahkan ini
-            $table->string('duration'); // <-- Tambahkan ini
-            $table->integer('students')->default(0); // <-- Tambahkan ini
-            $table->decimal('rating', 2, 1)->default(0.0); // <-- Tambahkan ini
-            $table->string('price'); // <-- Tambahkan ini
-            $table->string('level'); // <-- Tambahkan ini
-            $table->boolean('isPremium')->default(false); // <-- Tambahkan ini
+            $table->string('instructor');
+            $table->string('duration');
+            $table->integer('students')->default(0);
+            $table->decimal('rating', 2, 1)->default(0.0);
+            $table->string('price');
+            $table->string('level');
+            $table->boolean('isPremium')->default(false);
             $table->timestamps();
         });
     }

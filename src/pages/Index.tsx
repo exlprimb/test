@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Layout from "@/components/Layout";
 import CourseCard from "@/components/CourseCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, BookOpen, Users, Clock, Star } from "lucide-react";
 
-// Definisikan tipe data untuk Course agar sesuai dengan backend
+// Definisikan tipe data untuk Course
 interface Course {
   id: number;
   title: string;
@@ -25,65 +25,74 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
 
-  // State untuk menampung data dari API
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [categories, setCategories] = useState<string[]>(["all"]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Mock data - in real app this would come from Supabase
+  const courses: Course[] = [
+    {
+      id: 1,
+      title: "Introduction to Web Development",
+      description: "Learn the basics of HTML, CSS, and JavaScript to build modern websites.",
+      thumbnail: "/placeholder.svg",
+      category: "Programming",
+      instructor: "John Doe",
+      duration: "8 weeks",
+      students: 1234,
+      rating: 4.8,
+      price: "Free",
+      level: "Beginner",
+      isPremium: false
+    },
+    {
+      id: 2,
+      title: "Advanced React Development",
+      description: "Master React hooks, context, and advanced patterns for professional development.",
+      thumbnail: "/placeholder.svg",
+      category: "Programming",
+      instructor: "Jane Smith",
+      duration: "12 weeks",
+      students: 856,
+      rating: 4.9,
+      price: "Premium",
+      level: "Advanced",
+      isPremium: true
+    },
+    {
+      id: 3,
+      title: "Digital Marketing Fundamentals",
+      description: "Learn SEO, social media marketing, and digital advertising strategies.",
+      thumbnail: "/placeholder.svg",
+      category: "Marketing",
+      instructor: "Mike Johnson",
+      duration: "6 weeks",
+      students: 2341,
+      rating: 4.7,
+      price: "Free",
+      level: "Beginner",
+      isPremium: false
+    },
+    {
+      id: 4,
+      title: "Data Science with Python",
+      description: "Explore data analysis, machine learning, and visualization with Python.",
+      thumbnail: "/placeholder.svg",
+      category: "Data Science",
+      instructor: "Sarah Wilson",
+      duration: "16 weeks",
+      students: 945,
+      rating: 4.8,
+      price: "Premium",
+      level: "Intermediate",
+      isPremium: true
+    }
+  ];
 
-  // useEffect untuk mengambil data kategori saat komponen pertama kali dimuat
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/categories`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setCategories(["all", ...data]);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      }
-    };
+  const categories = ["all", "Programming", "Marketing", "Data Science", "Design", "Business"];
 
-    fetchCategories();
-  }, []);
-
-  // useEffect untuk mengambil data kursus setiap kali ada perubahan pada search atau filter
-  useEffect(() => {
-    const fetchCourses = async () => {
-      setIsLoading(true);
-      const params = new URLSearchParams({
-        search: searchTerm,
-        category: selectedCategory,
-      });
-
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/courses?${params.toString()}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        
-        // --- LANGKAH DEBUGGING ---
-        // Baris ini akan menampilkan data mentah dari API di konsol browser.
-        console.log("Data diterima dari API:", data); 
-        
-        setCourses(data);
-      } catch (error) {
-        console.error("Failed to fetch courses:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const handler = setTimeout(() => {
-      fetchCourses();
-    }, 500);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchTerm, selectedCategory]);
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <Layout>
@@ -161,6 +170,7 @@ const Index = () => {
                 Popular Courses
               </h2>
               
+              {/* Category Filter */}
               <div className="flex items-center space-x-2">
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <select
@@ -177,19 +187,13 @@ const Index = () => {
               </div>
             </div>
 
-            {isLoading ? (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground text-lg">Loading courses...</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {courses.map(course => (
-                  <CourseCard key={course.id} course={course} />
-                ))}
-              </div>
-            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredCourses.map(course => (
+                <CourseCard key={course.id} course={course} />
+              ))}
+            </div>
 
-            {!isLoading && courses.length === 0 && (
+            {filteredCourses.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-muted-foreground text-lg">
                   No courses found matching your criteria.
